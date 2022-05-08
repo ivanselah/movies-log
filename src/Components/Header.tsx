@@ -1,11 +1,26 @@
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 
+const logVariants = {
+  normal: {
+    fillOpacity: 1,
+  },
+  active: {
+    fillOpacity: [0, 1, 0],
+    transition: {
+      repeat: Infinity,
+    },
+  },
+};
+
 function Header() {
   return (
     <Nav>
       <Column>
         <Logo
+          variants={logVariants}
+          initial='normal'
+          whileHover='active'
           fill='currentColor'
           xmlns='http://www.w3.org/2000/svg'
           width='1024'
@@ -52,7 +67,7 @@ const Column = styled.div`
   align-items: center;
 `;
 
-const Logo = styled.svg`
+const Logo = styled(motion.svg)`
   margin-right: 50px;
   width: 95px;
   height: 25px;
