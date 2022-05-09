@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import { Link, useMatch } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useState } from 'react';
 
 const logVariants = {
   normal: {
@@ -15,8 +16,10 @@ const logVariants = {
 };
 
 function Header() {
+  const [searchOpen, setSearchOpen] = useState(false);
   const homeMatch = useMatch('/');
   const tvMatch = useMatch('/tv');
+  const toggleSearch = () => setSearchOpen((prev) => !prev);
 
   return (
     <Nav>
@@ -35,22 +38,30 @@ function Header() {
         </Logo>
         <Items>
           <Item>
-            <Link to='/'>Home {homeMatch && <Circle />}</Link>
+            <Link to='/'>Home {homeMatch && <Circle layoutId='circle' />}</Link>
           </Item>
           <Item>
-            <Link to='/tv'>Tv Shows {tvMatch && <Circle />}</Link>
+            <Link to='/tv'>Tv Shows {tvMatch && <Circle layoutId='circle' />}</Link>
           </Item>
         </Items>
       </Column>
       <Column>
         <Search>
-          <svg fill='currentColor' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'>
-            <path
-              fillRule='evenodd'
-              d='M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z'
-              clipRule='evenodd'
-            ></path>
-          </svg>
+          <motion.svg
+            onClick={toggleSearch}
+            animate={{ x: searchOpen ? -185 : 0 }}
+            transition={{ type: 'linear' }}
+            xmlns='http://www.w3.org/2000/svg'
+            viewBox='0 0 512 512'
+            fill='currentColor'
+          >
+            <path d='M500.3 443.7l-119.7-119.7c27.22-40.41 40.65-90.9 33.46-144.7C401.8 87.79 326.8 13.32 235.2 1.723C99.01-15.51-15.51 99.01 1.724 235.2c11.6 91.64 86.08 166.7 177.6 178.9c53.8 7.189 104.3-6.236 144.7-33.46l119.7 119.7c15.62 15.62 40.95 15.62 56.57 0C515.9 484.7 515.9 459.3 500.3 443.7zM79.1 208c0-70.58 57.42-128 128-128s128 57.42 128 128c0 70.58-57.42 128-128 128S79.1 278.6 79.1 208z' />
+          </motion.svg>
+          <Input
+            animate={{ scaleX: searchOpen ? 1 : 0 }}
+            transition={{ type: 'linear' }}
+            placeholder='Search for movie or tv show...'
+          />
         </Search>
       </Column>
     </Nav>
@@ -58,13 +69,13 @@ function Header() {
 }
 
 const Nav = styled.nav`
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
   position: fixed;
-  width: 100%;
-  top: 0;
   background-color: black;
+  top: 0;
   color: white;
   padding: 20px 60px;
   font-size: 13px;
@@ -72,6 +83,7 @@ const Nav = styled.nav`
 
 const Column = styled.div`
   display: flex;
+  justify-content: center;
   align-items: center;
 `;
 
@@ -104,7 +116,7 @@ const Item = styled.li`
   }
 `;
 
-const Circle = styled.span`
+const Circle = styled(motion.span)`
   position: absolute;
   width: 5px;
   height: 5px;
@@ -117,10 +129,21 @@ const Circle = styled.span`
 `;
 
 const Search = styled.span`
+  width: 150px;
   color: white;
+  display: flex;
+  align-items: center;
+  position: relative;
   svg {
     height: 25px;
+    cursor: pointer;
   }
+`;
+
+const Input = styled(motion.input)`
+  position: absolute;
+  transform-origin: right center;
+  left: -155px;
 `;
 
 export default Header;
