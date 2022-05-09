@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { Link, useMatch } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { motion, useAnimation, useViewportScroll } from 'framer-motion';
+import { useEffect, useState } from 'react';
 
 const logVariants = {
   normal: {
@@ -15,14 +15,41 @@ const logVariants = {
   },
 };
 
+const navVariants = {
+  top: { backgroundColor: 'rgba(0, 0, 0, 0)' },
+  scroll: { backgroundColor: 'rgba(0, 0, 0, 1)' },
+};
+
 function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const homeMatch = useMatch('/');
   const tvMatch = useMatch('/tv');
-  const toggleSearch = () => setSearchOpen((prev) => !prev);
-
+  const inputAnimation = useAnimation();
+  const navAnimation = useAnimation();
+  const { scrollY } = useViewportScroll();
+  const toggleSearch = () => {
+    if (searchOpen) {
+      inputAnimation.start({
+        scaleX: 0,
+      });
+    } else {
+      inputAnimation.start({
+        scaleX: 1,
+      });
+    }
+    setSearchOpen((prev) => !prev);
+  };
+  useEffect(() => {
+    scrollY.onChange(() => {
+      if (scrollY.get() > 80) {
+        navAnimation.start('scroll');
+      } else {
+        navAnimation.start('top');
+      }
+    });
+  }, [scrollY, navAnimation]);
   return (
-    <Nav>
+    <Nav variants={navVariants} animate={navAnimation} initial='top'>
       <Column>
         <Logo
           variants={logVariants}
@@ -58,7 +85,8 @@ function Header() {
             <path d='M500.3 443.7l-119.7-119.7c27.22-40.41 40.65-90.9 33.46-144.7C401.8 87.79 326.8 13.32 235.2 1.723C99.01-15.51-15.51 99.01 1.724 235.2c11.6 91.64 86.08 166.7 177.6 178.9c53.8 7.189 104.3-6.236 144.7-33.46l119.7 119.7c15.62 15.62 40.95 15.62 56.57 0C515.9 484.7 515.9 459.3 500.3 443.7zM79.1 208c0-70.58 57.42-128 128-128s128 57.42 128 128c0 70.58-57.42 128-128 128S79.1 278.6 79.1 208z' />
           </motion.svg>
           <Input
-            animate={{ scaleX: searchOpen ? 1 : 0 }}
+            animate={inputAnimation}
+            initial={{ scaleX: 0 }}
             transition={{ type: 'linear' }}
             placeholder='Search for movie or tv show...'
           />
@@ -68,13 +96,12 @@ function Header() {
   );
 }
 
-const Nav = styled.nav`
+const Nav = styled(motion.nav)`
   width: 100%;
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   align-items: center;
   position: fixed;
-  background-color: black;
   top: 0;
   color: white;
   padding: 20px 60px;
@@ -129,21 +156,30 @@ const Circle = styled(motion.span)`
 `;
 
 const Search = styled.span`
-  width: 150px;
+  min-width: 150px;
   color: white;
   display: flex;
   align-items: center;
   position: relative;
   svg {
-    height: 25px;
+    height: 20px;
     cursor: pointer;
   }
 `;
 
 const Input = styled(motion.input)`
+  width: 100%;
   position: absolute;
   transform-origin: right center;
-  left: -155px;
+  right: 0px;
+  padding: 5px 10px;
+  padding-left: 40px;
+  left: -195px;
+  z-index: -1;
+  color: white;
+  font-size: 16px;
+  background-color: transparent;
+  border: 1px solid ${(props) => props.theme.white.lighter};
 `;
 
 export default Header;
