@@ -12,3 +12,5 @@
 - `Redux || Recoil? || Zustand?`
 - `React-router-dom@6`
 - `Styled-Components`
+- `Framer-motion`
+- `React-Query`
