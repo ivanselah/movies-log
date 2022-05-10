@@ -29,6 +29,7 @@ footer, header, hgroup, menu, nav, section {
 body {
 	line-height: 1;
 	font-family: 'Open Sans', sans-serif;
+	color: ${(props) => props.theme.white.darker};
 }
 ol, ul {
 	list-style: none;
