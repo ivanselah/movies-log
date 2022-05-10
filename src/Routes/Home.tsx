@@ -1,8 +1,21 @@
-import { useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { useQuery } from 'react-query';
 import styled from 'styled-components';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getMovies, GetMoviesResult } from '../apt';
 import { makeImagePath } from '../utilities';
+
+const rowVariants = {
+  hidden: {
+    x: 1000,
+  },
+  visible: {
+    x: 0,
+  },
+  exit: {
+    x: -1000,
+  },
+};
 
 function Home() {
   const { data, isLoading } = useQuery<GetMoviesResult>(['movies', 'nowPlaying'], getMovies);
@@ -11,6 +24,8 @@ function Home() {
     overview: '',
     backdrop_path: '',
   });
+
+  const [index, setIndex] = useState(0);
 
   useEffect(() => {
     data &&
@@ -21,15 +36,31 @@ function Home() {
       });
   }, [data]);
 
+  const increaseIndex = () => setIndex((index) => index + 1);
+
   return (
     <Wrapper>
       {isLoading ? (
         <Loader>Loading...</Loader>
       ) : (
-        <Banner bgPhoto={makeImagePath(initialData.backdrop_path)}>
-          <Title>{initialData.title}</Title>
-          <Overview>{initialData.overview}</Overview>
-        </Banner>
+        <Fragment>
+          <Banner onClick={increaseIndex} bgPhoto={makeImagePath(initialData.backdrop_path)}>
+            <Title>{initialData.title}</Title>
+            <Overview>{initialData.overview}</Overview>
+          </Banner>
+          <Slider>
+            <AnimatePresence>
+              <Row variants={rowVariants} initial='hidden' animate='visible' exit='exit' key={index}>
+                <Box />
+                <Box />
+                <Box />
+                <Box />
+                <Box />
+                <Box />
+              </Row>
+            </AnimatePresence>
+          </Slider>
+        </Fragment>
       )}
     </Wrapper>
   );
@@ -64,6 +95,23 @@ const Title = styled.h2`
 const Overview = styled.p`
   font-size: 30px;
   width: 70%;
+`;
+
+const Slider = styled.div`
+  position: relative;
+`;
+
+const Row = styled(motion.div)`
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+  position: absolute;
+  width: 100%;
+`;
+
+const Box = styled(motion.div)`
+  background-color: white;
+  height: 200px;
 `;
 
 export default Home;
