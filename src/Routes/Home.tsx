@@ -17,6 +17,20 @@ const rowVariants = {
   },
 };
 
+const boxVariants = {
+  normal: {
+    scale: 1,
+  },
+  hover: {
+    scale: 1.3,
+    y: -50,
+    transition: {
+      type: 'tween',
+      delay: 0.3,
+    },
+  },
+};
+
 const OFF_SET = 6;
 
 function Home() {
@@ -73,7 +87,15 @@ function Home() {
                   .slice(1)
                   .slice(OFF_SET * index, OFF_SET * index + OFF_SET)
                   .map((item) => {
-                    return <Box bgPhoto={makeImagePath(item.backdrop_path, 'w500')}>{item.title}</Box>;
+                    return (
+                      <Box
+                        variants={boxVariants}
+                        bgPhoto={makeImagePath(item.backdrop_path, 'w500')} //
+                        initial='normal'
+                        transition={{ type: 'tween' }}
+                        whileHover='hover'
+                      />
+                    );
                   })}
               </Row>
             </AnimatePresence>
@@ -117,7 +139,7 @@ const Overview = styled.p`
 
 const Slider = styled.div`
   position: relative;
-  top: -300px;
+  top: -500px;
 `;
 
 const Row = styled(motion.div)`
@@ -134,6 +156,15 @@ const Box = styled(motion.div)<{ bgPhoto: string }>`
   background-size: cover;
   background-position: center;
   height: 250px;
+  cursor: pointer;
+  &:first-child {
+    transform-origin: center left;
+    margin-left: 20px;
+  }
+  &:last-child {
+    transform-origin: center right;
+    margin-right: 20px;
+  }
 `;
 
 export default Home;
