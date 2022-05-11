@@ -17,6 +17,8 @@ const rowVariants = {
   },
 };
 
+const OFF_SET = 6;
+
 function Home() {
   const { data, isLoading } = useQuery<GetMoviesResult>(['movies', 'nowPlaying'], getMovies);
   const [initialData, setInitialData] = useState({
@@ -26,17 +28,26 @@ function Home() {
   });
 
   const [index, setIndex] = useState(0);
+  const [leaving, setLeaving] = useState(false);
 
   useEffect(() => {
     data &&
       setInitialData({
-        title: data.results[1].title,
-        overview: data.results[1].overview,
-        backdrop_path: data.results[1].backdrop_path,
+        title: data.results[0].title,
+        overview: data.results[0].overview,
+        backdrop_path: data.results[0].backdrop_path,
       });
   }, [data]);
 
-  const increaseIndex = () => setIndex((index) => index + 1);
+  const increaseIndex = () => {
+    if (leaving || !data) return;
+    toggleLeaving();
+    const totalMovies = data.results.length - 1;
+    const maxIndex = Math.floor(totalMovies / OFF_SET) - 1;
+    setIndex((index) => (index === maxIndex ? 0 : index + 1));
+  };
+
+  const toggleLeaving = () => setLeaving((prev) => !prev);
 
   return (
     <Wrapper>
@@ -49,21 +60,21 @@ function Home() {
             <Overview>{initialData.overview}</Overview>
           </Banner>
           <Slider>
-            <AnimatePresence>
+            <AnimatePresence initial={false} onExitComplete={toggleLeaving}>
               <Row
                 variants={rowVariants}
                 initial='hidden'
                 animate='visible'
                 exit='exit'
-                transition={{ type: 'tween', duration: 5 }}
+                transition={{ type: 'tween', duration: 1 }}
                 key={index}
               >
-                <Box />
-                <Box />
-                <Box />
-                <Box />
-                <Box />
-                <Box />
+                {data?.results
+                  .slice(1)
+                  .slice(OFF_SET * index, OFF_SET * index + OFF_SET)
+                  .map((item) => {
+                    return <Box bgPhoto={makeImagePath(item.backdrop_path, 'w500')}>{item.title}</Box>;
+                  })}
               </Row>
             </AnimatePresence>
           </Slider>
@@ -117,9 +128,12 @@ const Row = styled(motion.div)`
   width: 100%;
 `;
 
-const Box = styled(motion.div)`
+const Box = styled(motion.div)<{ bgPhoto: string }>`
   background-color: white;
-  height: 200px;
+  background-image: url(${(props) => props.bgPhoto});
+  background-size: cover;
+  background-position: center;
+  height: 250px;
 `;
 
 export default Home;
