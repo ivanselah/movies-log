@@ -31,6 +31,16 @@ const boxVariants = {
   },
 };
 
+const infoVariants = {
+  hover: {
+    opacity: 1,
+    transition: {
+      type: 'tween',
+      delay: 0.3,
+    },
+  },
+};
+
 const OFF_SET = 6;
 
 function Home() {
@@ -94,7 +104,11 @@ function Home() {
                         initial='normal'
                         transition={{ type: 'tween' }}
                         whileHover='hover'
-                      />
+                      >
+                        <Info variants={infoVariants}>
+                          <h4>{item.title}</h4>
+                        </Info>
+                      </Box>
                     );
                   })}
               </Row>
@@ -139,7 +153,7 @@ const Overview = styled.p`
 
 const Slider = styled.div`
   position: relative;
-  top: -500px;
+  top: -300px;
 `;
 
 const Row = styled(motion.div)`
@@ -155,7 +169,7 @@ const Box = styled(motion.div)<{ bgPhoto: string }>`
   background-image: url(${(props) => props.bgPhoto});
   background-size: cover;
   background-position: center;
-  height: 250px;
+  height: 200px;
   cursor: pointer;
   &:first-child {
     transform-origin: center left;
@@ -164,6 +178,19 @@ const Box = styled(motion.div)<{ bgPhoto: string }>`
   &:last-child {
     transform-origin: center right;
     margin-right: 20px;
+  }
+`;
+
+const Info = styled(motion.div)`
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background-color: ${(props) => props.theme.black.darker};
+  opacity: 0;
+  h4 {
+    padding: 10px;
+    text-align: center;
+    font-size: 13px;
   }
 `;
 
