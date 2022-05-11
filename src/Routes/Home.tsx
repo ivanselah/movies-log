@@ -7,13 +7,13 @@ import { makeImagePath } from '../utilities';
 
 const rowVariants = {
   hidden: {
-    x: 1000,
+    x: window.outerWidth + 10,
   },
   visible: {
     x: 0,
   },
   exit: {
-    x: -1000,
+    x: -window.outerWidth - 10,
   },
 };
 
@@ -30,9 +30,9 @@ function Home() {
   useEffect(() => {
     data &&
       setInitialData({
-        title: data.results[2].title,
-        overview: data.results[2].overview,
-        backdrop_path: data.results[2].backdrop_path,
+        title: data.results[1].title,
+        overview: data.results[1].overview,
+        backdrop_path: data.results[1].backdrop_path,
       });
   }, [data]);
 
@@ -50,7 +50,14 @@ function Home() {
           </Banner>
           <Slider>
             <AnimatePresence>
-              <Row variants={rowVariants} initial='hidden' animate='visible' exit='exit' key={index}>
+              <Row
+                variants={rowVariants}
+                initial='hidden'
+                animate='visible'
+                exit='exit'
+                transition={{ type: 'tween', duration: 5 }}
+                key={index}
+              >
                 <Box />
                 <Box />
                 <Box />
@@ -99,6 +106,7 @@ const Overview = styled.p`
 
 const Slider = styled.div`
   position: relative;
+  top: -300px;
 `;
 
 const Row = styled(motion.div)`
