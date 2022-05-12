@@ -1,7 +1,8 @@
 import styled from 'styled-components';
-import { Link, useMatch } from 'react-router-dom';
+import { Link, useMatch, useNavigate } from 'react-router-dom';
 import { motion, useAnimation, useViewportScroll } from 'framer-motion';
 import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 
 const logVariants = {
   normal: {
@@ -20,13 +21,19 @@ const navVariants = {
   scroll: { backgroundColor: 'rgba(0, 0, 0, 1)' },
 };
 
+type SearchKeyword = {
+  keyword: string;
+};
+
 function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
+  const { register, handleSubmit } = useForm<SearchKeyword>();
   const homeMatch = useMatch('/');
   const tvMatch = useMatch('/tv');
   const inputAnimation = useAnimation();
   const navAnimation = useAnimation();
   const { scrollY } = useViewportScroll();
+  const navigator = useNavigate();
   const toggleSearch = () => {
     if (searchOpen) {
       inputAnimation.start({
@@ -48,6 +55,11 @@ function Header() {
       }
     });
   }, [scrollY, navAnimation]);
+
+  const onSubmit = ({ keyword }: SearchKeyword) => {
+    navigator(`/search?keyword=${keyword}`);
+  };
+
   return (
     <Nav variants={navVariants} animate={navAnimation} initial='top'>
       <Column>
@@ -73,7 +85,7 @@ function Header() {
         </Items>
       </Column>
       <Column>
-        <Search>
+        <Search onSubmit={handleSubmit(onSubmit)}>
           <motion.svg
             onClick={toggleSearch}
             animate={{ x: searchOpen ? -185 : 0 }}
@@ -85,6 +97,7 @@ function Header() {
             <path d='M500.3 443.7l-119.7-119.7c27.22-40.41 40.65-90.9 33.46-144.7C401.8 87.79 326.8 13.32 235.2 1.723C99.01-15.51-15.51 99.01 1.724 235.2c11.6 91.64 86.08 166.7 177.6 178.9c53.8 7.189 104.3-6.236 144.7-33.46l119.7 119.7c15.62 15.62 40.95 15.62 56.57 0C515.9 484.7 515.9 459.3 500.3 443.7zM79.1 208c0-70.58 57.42-128 128-128s128 57.42 128 128c0 70.58-57.42 128-128 128S79.1 278.6 79.1 208z' />
           </motion.svg>
           <Input
+            {...register('keyword', { required: true, minLength: 2 })}
             animate={inputAnimation}
             initial={{ scaleX: 0 }}
             transition={{ type: 'linear' }}
@@ -155,7 +168,7 @@ const Circle = styled(motion.span)`
   background-color: ${(props) => props.theme.red};
 `;
 
-const Search = styled.span`
+const Search = styled.form`
   min-width: 150px;
   color: white;
   display: flex;

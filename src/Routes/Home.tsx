@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useRef, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { useQuery } from 'react-query';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
