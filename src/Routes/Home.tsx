@@ -56,6 +56,7 @@ function Home() {
   const [leaving, setLeaving] = useState(false);
   const navigator = useNavigate();
   const movieMatch: PathMatch<string> | null = useMatch('/movies/:movieId');
+  const [isVisibleMovieModal, setIsVisibleMovieModal] = useState(false);
 
   useEffect(() => {
     data &&
@@ -65,6 +66,10 @@ function Home() {
         backdrop_path: data.results[0].backdrop_path,
       });
   }, [data]);
+
+  useEffect(() => {
+    movieMatch && setIsVisibleMovieModal(true);
+  }, [movieMatch]);
 
   const increaseIndex = () => {
     if (leaving || !data) return;
@@ -78,6 +83,13 @@ function Home() {
 
   const onBoxClick = (movieId: number) => {
     navigator(`movies/${movieId}`);
+  };
+
+  const onCloseModal = () => {
+    if (isVisibleMovieModal) {
+      navigator('/', { replace: true });
+      setIsVisibleMovieModal(false);
+    }
   };
 
   return (
@@ -125,13 +137,26 @@ function Home() {
             </AnimatePresence>
           </Slider>
           <AnimatePresence>
-            {movieMatch ? <MovieModal layoutId={String(movieMatch?.params.movieId)} /> : null}
+            {movieMatch ? (
+              <Overlay onClick={onCloseModal} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <MovieModal layoutId={String(movieMatch?.params.movieId)} />
+              </Overlay>
+            ) : null}
           </AnimatePresence>
         </Fragment>
       )}
     </Wrapper>
   );
 }
+
+const Overlay = styled(motion.div)`
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 200vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+`;
 
 const MovieModal = styled(motion.div)`
   width: 40vw;
