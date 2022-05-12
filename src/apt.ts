@@ -1,7 +1,7 @@
 const API_KEY = '5b42baf14b999aeb69e9bef0f88d55da';
 const BASE_PATH = 'https://api.themoviedb.org/3';
 
-type MovieProps = {
+export type MovieProps = {
   id: number;
   backdrop_path: string;
   poster_path: string;

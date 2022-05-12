@@ -1,8 +1,8 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useRef, useState } from 'react';
 import { useQuery } from 'react-query';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getMovies, GetMoviesResult } from '../apt';
+import { getMovies, GetMoviesResult, MovieProps } from '../apt';
 import { makeImagePath } from '../utilities';
 import { PathMatch, useMatch, useNavigate } from 'react-router-dom';
 
@@ -57,6 +57,7 @@ function Home() {
   const navigator = useNavigate();
   const movieMatch: PathMatch<string> | null = useMatch('/movies/:movieId');
   const [isVisibleMovieModal, setIsVisibleMovieModal] = useState(false);
+  const [selectedMovieInfo, setSelectedMovieInfo] = useState<MovieProps | undefined>(undefined);
 
   useEffect(() => {
     data &&
@@ -68,8 +69,14 @@ function Home() {
   }, [data]);
 
   useEffect(() => {
-    movieMatch && setIsVisibleMovieModal(true);
-  }, [movieMatch]);
+    if (movieMatch) {
+      setIsVisibleMovieModal(true);
+      const clickMovieInfo =
+        movieMatch?.params.movieId &&
+        data?.results.find((movie) => String(movie.id) === String(movieMatch.params.movieId));
+      clickMovieInfo && setSelectedMovieInfo(clickMovieInfo as MovieProps);
+    }
+  }, [movieMatch, data?.results]);
 
   const increaseIndex = () => {
     if (leaving || !data) return;
@@ -137,11 +144,25 @@ function Home() {
             </AnimatePresence>
           </Slider>
           <AnimatePresence>
-            {movieMatch ? (
-              <Overlay onClick={onCloseModal} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <MovieModal layoutId={String(movieMatch?.params.movieId)} />
-              </Overlay>
-            ) : null}
+            {movieMatch && (
+              <>
+                (
+                <Overlay onClick={onCloseModal} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <MovieModal layoutId={String(movieMatch?.params.movieId)}>
+                    {selectedMovieInfo && (
+                      <>
+                        <ModalInnerBox bgPhoto={makeImagePath(selectedMovieInfo.backdrop_path, 'w500')}>
+                          <div />
+                          <h2>{selectedMovieInfo.title}</h2>
+                          <p>{selectedMovieInfo.overview}</p>
+                        </ModalInnerBox>
+                      </>
+                    )}
+                  </MovieModal>
+                </Overlay>
+                ) : null
+              </>
+            )}
           </AnimatePresence>
         </Fragment>
       )}
@@ -149,22 +170,49 @@ function Home() {
   );
 }
 
+const ModalInnerBox = styled(motion.div)<{ bgPhoto: string }>`
+  div {
+    width: 100%;
+    height: 500px;
+    background-image: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent), url(${(props) => props.bgPhoto});
+    background-size: cover;
+  }
+  h2 {
+    width: 100%;
+    position: absolute;
+    top: 60%;
+    left: 50%;
+    transform: translate(-50%, 30%);
+    text-align: center;
+    font-size: 23px;
+    font-weight: bold;
+  }
+  p {
+    padding: 10px;
+  }
+`;
+
 const Overlay = styled(motion.div)`
   position: fixed;
   top: 0;
   width: 100%;
   height: 200vh;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.7);
   opacity: 0;
 `;
 
 const MovieModal = styled(motion.div)`
   width: 40vw;
   height: 80vh;
-  background-color: white;
+  background-color: ${(props) => props.theme.black.lighter};
   position: absolute;
   top: 100px;
   left: 30%;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0px 0px 10px 0px rgba(255, 255, 255, 0.5);
+  -webkit-box-shadow: 0px 0px 10px 0px rgba(255, 255, 255, 0.5);
+  -moz-box-shadow: 0px 0px 10px 0px rgba(255, 255, 255, 0.5);
 `;
 
 const Wrapper = styled.div`
