@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getMovies, GetMoviesResult } from '../apt';
 import { makeImagePath } from '../utilities';
+import { PathMatch, useMatch, useNavigate } from 'react-router-dom';
 
 const rowVariants = {
   hidden: {
@@ -53,6 +54,8 @@ function Home() {
 
   const [index, setIndex] = useState(0);
   const [leaving, setLeaving] = useState(false);
+  const navigator = useNavigate();
+  const movieMatch: PathMatch<string> | null = useMatch('/movies/:movieId');
 
   useEffect(() => {
     data &&
@@ -72,6 +75,10 @@ function Home() {
   };
 
   const toggleLeaving = () => setLeaving((prev) => !prev);
+
+  const onBoxClick = (movieId: number) => {
+    navigator(`movies/${movieId}`);
+  };
 
   return (
     <Wrapper>
@@ -96,17 +103,20 @@ function Home() {
                 {data?.results
                   .slice(1)
                   .slice(OFF_SET * index, OFF_SET * index + OFF_SET)
-                  .map((item) => {
+                  .map((movie) => {
                     return (
                       <Box
+                        key={movie.id}
+                        layoutId={String(movie.id)}
+                        onClick={() => onBoxClick(movie.id)}
                         variants={boxVariants}
-                        bgPhoto={makeImagePath(item.backdrop_path, 'w500')} //
+                        bgphoto={makeImagePath(movie.backdrop_path, 'w500')} //
                         initial='normal'
                         transition={{ type: 'tween' }}
                         whileHover='hover'
                       >
                         <Info variants={infoVariants}>
-                          <h4>{item.title}</h4>
+                          <h4>{movie.title}</h4>
                         </Info>
                       </Box>
                     );
@@ -114,11 +124,23 @@ function Home() {
               </Row>
             </AnimatePresence>
           </Slider>
+          <AnimatePresence>
+            {movieMatch ? <MovieModal layoutId={String(movieMatch?.params.movieId)} /> : null}
+          </AnimatePresence>
         </Fragment>
       )}
     </Wrapper>
   );
 }
+
+const MovieModal = styled(motion.div)`
+  width: 40vw;
+  height: 80vh;
+  background-color: white;
+  position: absolute;
+  top: 100px;
+  left: 30%;
+`;
 
 const Wrapper = styled.div`
   background-color: black;
@@ -164,9 +186,9 @@ const Row = styled(motion.div)`
   width: 100%;
 `;
 
-const Box = styled(motion.div)<{ bgPhoto: string }>`
+const Box = styled(motion.div)<{ bgphoto: string }>`
   background-color: white;
-  background-image: url(${(props) => props.bgPhoto});
+  background-image: url(${(props) => props.bgphoto});
   background-size: cover;
   background-position: center;
   height: 200px;
@@ -179,6 +201,9 @@ const Box = styled(motion.div)<{ bgPhoto: string }>`
     transform-origin: center right;
     margin-right: 20px;
   }
+  box-shadow: 10px 10px 5px 0px rgba(255, 255, 255, 0.2);
+  -webkit-box-shadow: 0px 2px 3px 0px rgba(255, 255, 255, 0.1);
+  -moz-box-shadow: 10px 10px 5px 0px rgba(255, 255, 255, 0.2);
 `;
 
 const Info = styled(motion.div)`
